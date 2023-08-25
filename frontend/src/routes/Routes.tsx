@@ -6,6 +6,7 @@ export function Router() {
         <Routes>
             {/*<Route path="/" element={<Home />} />*/}
             <Route path="/login" element={<Login />} />
+            {/*<Route path="/signup" element={<login />} />*/}
         </Routes>
     );
 }
