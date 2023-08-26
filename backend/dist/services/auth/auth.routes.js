@@ -51,24 +51,26 @@ router.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const { email, password } = req.body;
         if (!email || !password) {
             res.status(400);
-            throw new Error('You must provide an email and a password.');
+            res.json('You must provide an email and a password.');
         }
         const existingUser = yield (0, users_services_1.findUserByEmail)(email);
         if (!existingUser) {
             res.status(403);
-            throw new Error('Invalid login credentials.');
+            res.json('Invalid login credentials.');
         }
         const validPassword = yield bcrypt.compare(password, existingUser.password);
         if (!validPassword) {
             res.status(403);
-            throw new Error('Invalid login credentials.');
+            res.json('Invalid login credentials.');
         }
         const jti = (0, uuid_1.v4)();
         const { accessToken, refreshToken } = (0, jwt_1.generateTokens)(existingUser, jti);
         yield (0, auth_services_1.addRefreshTokenToWhitelist)({ jti, refreshToken, userId: existingUser.id });
+        const isAdmin = existingUser.is_admin;
         res.json({
             accessToken,
-            refreshToken
+            refreshToken,
+            isAdmin
         });
     }
     catch (err) {

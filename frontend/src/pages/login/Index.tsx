@@ -5,13 +5,22 @@ import FormExtra from "../../components/login/FormExtra.tsx";
 import FormAction from "../../components/login/FormAction.tsx";
 import axios from 'axios';
 import {loginFields} from "../../constants/formFields.ts";
+import Cookies from "universal-cookie";
+import {useNavigate} from 'react-router-dom';
+
+
+const cookies = new Cookies();
 
 const fields = loginFields;
 let fieldsState: any = {};
 fields.forEach(field => fieldsState[field.id] = '');
 
 export function Login() {
+    const navigate = useNavigate();
+
     const [loginState, setLoginState] = useState(fieldsState);
+
+    const [error, setError] = useState<string>();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setLoginState({...loginState, [e.target.id]: e.target.value});
@@ -35,14 +44,21 @@ export function Login() {
                 }
             );
 
-            return data;
+            cookies.set("token", data.accessToken, {
+                path: "/",
+            });
+
+            if (data.isAdmin) {
+                navigate("/dashboard");
+            } else {
+                navigate("/");
+            }
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                console.log('error message: ', error.message);
-                return error.message;
+                setError(error.response?.data);
             } else {
-                console.log('unexpected error: ', error);
-                return 'An unexpected error occurred';
+                setError('An unexpected error occurred');
             }
         }
     }
@@ -70,10 +86,12 @@ export function Login() {
                                     />
                                 )
                             }
+                            <label className="text-red-500">{error}</label>
                         </div>
 
                         <FormExtra/>
                         <FormAction text={"Login"}/>
+
                     </form>
                 </div>
             </div>

@@ -46,30 +46,32 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
 
         if (!email || !password) {
             res.status(400);
-            throw new Error('You must provide an email and a password.');
+            res.json('You must provide an email and a password.');
         }
 
         const existingUser = await findUserByEmail(email);
 
         if (!existingUser) {
             res.status(403);
-            throw new Error('Invalid login credentials.');
+            res.json('Invalid login credentials.');
         }
 
         const validPassword = await bcrypt.compare(password, existingUser.password);
 
         if (!validPassword) {
             res.status(403);
-            throw new Error('Invalid login credentials.');
+            res.json('Invalid login credentials.');
         }
 
         const jti = uuidv4();
         const {accessToken, refreshToken} = generateTokens(existingUser, jti);
         await addRefreshTokenToWhitelist({jti, refreshToken, userId: existingUser.id});
+        const isAdmin = existingUser.is_admin;
 
         res.json({
             accessToken,
-            refreshToken
+            refreshToken,
+            isAdmin
         });
     } catch (err) {
         next(err);
