@@ -49,6 +49,10 @@ export function Login() {
             });
 
             if (data.isAdmin) {
+                cookies.set("is_admin", data.isAdmin, {
+                    path: "/",
+                });
+
                 navigate("/dashboard");
             } else {
                 navigate("/");

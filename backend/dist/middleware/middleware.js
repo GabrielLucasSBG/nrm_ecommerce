@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAuthenticated = void 0;
+exports.isAdmin = exports.isAuthenticated = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function isAuthenticated(req, res, next) {
     const { authorization } = req.headers;
@@ -24,3 +24,15 @@ function isAuthenticated(req, res, next) {
     return next();
 }
 exports.isAuthenticated = isAuthenticated;
+function isAdmin(req, res, next) {
+    const { authorization } = req.headers;
+    if (authorization) {
+        const { is_admin } = jsonwebtoken_1.default.decode(authorization);
+        if (!is_admin) {
+            res.status(401);
+            throw new Error('🚫 Un-Authorized 🚫');
+        }
+    }
+    return next();
+}
+exports.isAdmin = isAdmin;

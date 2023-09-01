@@ -29,3 +29,14 @@ export function findUserById(id: number) {
         }
     });
 }
+
+export function allUsers() {
+    return db.users.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            is_admin: true
+        },
+    });
+}

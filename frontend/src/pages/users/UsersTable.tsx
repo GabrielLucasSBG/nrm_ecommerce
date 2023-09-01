@@ -13,63 +13,52 @@ import {
     IconButton,
     Tooltip
 } from "@material-tailwind/react";
+import axios from "axios";
 
-const TABLE_HEAD = ["ID", "Name", "Email", "Admin", ""];
+import Cookies from "universal-cookie";
+import {useState, useEffect} from "react";
 
-const TABLE_ROWS = [
-    {
-        img: "/img/logos/logo-spotify.svg",
-        name: "Spotify",
-        amount: "$2,500",
-        date: "Wed 3:00pm",
-        status: "paid",
-        account: "visa",
-        accountNumber: "1234",
-        expiry: "06/2026",
-    },
-    {
-        img: "/img/logos/logo-amazon.svg",
-        name: "Amazon",
-        amount: "$5,000",
-        date: "Wed 1:00pm",
-        status: "paid",
-        account: "master-card",
-        accountNumber: "1234",
-        expiry: "06/2026",
-    },
-    {
-        img: "/img/logos/logo-pinterest.svg",
-        name: "Pinterest",
-        amount: "$3,400",
-        date: "Mon 7:40pm",
-        status: "pending",
-        account: "master-card",
-        accountNumber: "1234",
-        expiry: "06/2026",
-    },
-    {
-        img: "/img/logos/logo-google.svg",
-        name: "Google",
-        amount: "$1,000",
-        date: "Wed 5:00pm",
-        status: "paid",
-        account: "visa",
-        accountNumber: "1234",
-        expiry: "06/2026",
-    },
-    {
-        img: "/img/logos/logo-netflix.svg",
-        name: "netflix",
-        amount: "$14,000",
-        date: "Wed 3:30am",
-        status: "cancelled",
-        account: "visa",
-        accountNumber: "1234",
-        expiry: "06/2026",
-    },
-];
+const cookies = new Cookies();
+
+interface User {
+    id: number,
+    name: string,
+    email: string,
+    is_admin: number
+}
 
 export function UsersTable() {
+    const [usersState, setusersState] = useState<User[]>([]);
+
+    useEffect(() => {
+        users();
+    }, []);
+
+    async function users() {
+        try {
+            const {data} = await axios.get<User[]>(
+                'http://localhost:3000/api/users/all', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        authorization: cookies.get('token')
+                    }
+                }
+            );
+
+
+            setusersState(data);
+        } catch (error) {
+            // if (axios.isAxiosError(error)) {
+            //     setError(error.response?.data);
+            // } else {
+            //     setError('An unexpected error occurred');
+            // }
+        }
+    }
+
+    const TABLE_HEAD = ["ID", "Name", "Email", "Admin", ""];
+
     return (
         <>
             <Card className="h-full w-full">
@@ -119,16 +108,17 @@ export function UsersTable() {
                         </tr>
                         </thead>
                         <tbody>
-                        {TABLE_ROWS.map(
+                        {usersState.map(
                             (
                                 {
+                                    id,
                                     name,
-                                    amount,
-                                    date
+                                    email,
+                                    is_admin,
                                 },
                                 index,
                             ) => {
-                                const isLast = index === TABLE_ROWS.length - 1;
+                                const isLast = index === usersState.length - 1;
                                 const classes = isLast
                                     ? "p-4"
                                     : "p-4 border-b border-blue-gray-50";
@@ -142,7 +132,7 @@ export function UsersTable() {
                                                     color="blue-gray"
                                                     className="font-bold"
                                                 >
-                                                    {name}
+                                                    {id}
                                                 </Typography>
                                             </div>
                                         </td>
@@ -152,7 +142,7 @@ export function UsersTable() {
                                                 color="blue-gray"
                                                 className="font-normal"
                                             >
-                                                {amount}
+                                                {name}
                                             </Typography>
                                         </td>
                                         <td className={classes}>
@@ -161,7 +151,7 @@ export function UsersTable() {
                                                 color="blue-gray"
                                                 className="font-normal"
                                             >
-                                                {date}
+                                                {email}
                                             </Typography>
                                         </td>
                                         <td className={classes}>
@@ -170,7 +160,7 @@ export function UsersTable() {
                                                 color="blue-gray"
                                                 className="font-normal"
                                             >
-                                                {date}
+                                                {is_admin ? "Sim" : "Não"}
                                             </Typography>
                                         </td>
                                         <td className={classes}>

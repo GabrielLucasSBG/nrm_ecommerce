@@ -16,7 +16,17 @@ const express_1 = __importDefault(require("express"));
 const middleware_1 = require("../../middleware/middleware");
 const users_services_1 = require("./users.services");
 const router = express_1.default.Router();
-router.get('/profile/:id', middleware_1.isAuthenticated, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/all', [middleware_1.isAuthenticated, middleware_1.isAdmin], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield (0, users_services_1.allUsers)();
+        delete users.password;
+        res.json(users);
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get('/profile/:id', [middleware_1.isAuthenticated, middleware_1.isAdmin], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const user = yield (0, users_services_1.findUserById)(parseInt(id));
